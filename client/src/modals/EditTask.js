@@ -1,0 +1,136 @@
+import React, { useState, useEffect } from "react";
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+
+const EditTask = ({ modal, toggle, updateTask, taskObj }) => {
+  const { REACT_APP_BACKEND_URL } = process.env;
+
+  const [task, setTask] = useState("");
+  const [assigned_to, setassigned_to] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+
+  const [location, setLocation] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "task") {
+      setTask(value);
+    } else if (name === "assigned_to") {
+      setassigned_to(value);
+    } else if (name === "date") {
+      setDate(value);
+    } else if (name === "time") {
+      setTime(value);
+    } else {
+      setLocation(value);
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    const data = { task, assigned_to, date, time, location };
+    try {
+      const response = await fetch(
+        `${REACT_APP_BACKEND_URL}/tasks/${taskObj.task_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+      const obj = await response.json();
+      console.log(obj);
+      updateTask(obj);
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  useEffect(() => {
+    setTask(taskObj.task);
+    setassigned_to(taskObj.assigned_to);
+    setDate(taskObj.date);
+    setTime(taskObj.time);
+    setLocation(taskObj.location);
+  }, []);
+
+  return (
+    <div>
+      <Modal isOpen={modal} toggle={toggle}>
+        <ModalHeader toggle={toggle}>Update Task</ModalHeader>
+        <ModalBody>
+          <div>
+            <label>Task</label>
+            <select
+              className="form-select form-select-lg mb-3"
+              aria-label=".form-select-lg example"
+              value={task}
+              onChange={handleChange}
+              name="task"
+            >
+              <option defaultValue>Select Task</option>
+              <option value="Mowing">Mowing</option>
+              <option value="Fertilisation">Fertilisation</option>
+              <option value="Irrigation">Irrigation</option>
+              <option value="Aeration">Aeration</option>
+            </select>
+          </div>
+          <div className="mb-3 form-group">
+            <label>Assigned To</label>
+            <input
+              type="text"
+              className="form-control"
+              value={assigned_to}
+              onChange={handleChange}
+              name="assigned_to"
+            />
+          </div>
+
+          <div className="mb-3 form-group">
+            <label>Date</label>
+            <input
+              type="date"
+              className="form-control"
+              value={date.split("T")[0]}
+              onChange={handleChange}
+              name="date"
+            />
+          </div>
+          <div className="mb-3 form-group">
+            <label>Time</label>
+            <input
+              type="time"
+              className="form-control"
+              value={time}
+              onChange={handleChange}
+              name="time"
+            />
+          </div>
+          <div className=" mb-3 form-group">
+            <label>Location</label>
+            <input
+              type="text"
+              className="form-control"
+              value={location}
+              onChange={handleChange}
+              name="location"
+            />
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="primary" onClick={handleUpdate}>
+            Update
+          </Button>{" "}
+          <Button color="secondary" onClick={toggle}>
+            Cancel
+          </Button>
+        </ModalFooter>
+      </Modal>
+    </div>
+  );
+};
+
+export default EditTask;
